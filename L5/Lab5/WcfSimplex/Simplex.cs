@@ -14,7 +14,7 @@ namespace WcfSimplex
             {
                 s = a1.s + a2.s,
                 k = a1.k + a2.k,
-                f = a1.f + a2.f
+                f = a1.f + a2.f,
             };
         }
     }

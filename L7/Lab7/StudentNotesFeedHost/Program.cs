@@ -1,7 +1,7 @@
-﻿using WsRamSyndicationService;
-using System;
-using System.ServiceModel.Web;
+﻿using System;
 using System.ServiceModel;
+using System.ServiceModel.Web;
+using WsRamSyndicationService;
 
 namespace StudentNotesFeedHost
 {

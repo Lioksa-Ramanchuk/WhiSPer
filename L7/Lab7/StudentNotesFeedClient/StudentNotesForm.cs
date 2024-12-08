@@ -3,8 +3,8 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
-using System.Xml.Linq;
 using System.Xml;
+using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
 
 namespace StudentNotesFeedClient
@@ -26,7 +26,8 @@ namespace StudentNotesFeedClient
             //ContentTextBox.Text = content;
 
             string format = FeedFormatInput.SelectedItem.ToString();
-            string url = $"http://localhost:8107/WsRamSyndicationService/StudentNotesFeed/{StudentIdInput.Value}?format={format}";
+            string url =
+                $"http://localhost:8107/WsRamSyndicationService/StudentNotesFeed/{StudentIdInput.Value}?format={format}";
 
             try
             {
@@ -35,7 +36,12 @@ namespace StudentNotesFeedClient
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 request.Method = "GET";
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
+                using (
+                    StreamReader reader = new StreamReader(
+                        response.GetResponseStream(),
+                        Encoding.UTF8
+                    )
+                )
                 {
                     content = reader.ReadToEnd();
                 }
@@ -53,14 +59,19 @@ namespace StudentNotesFeedClient
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    $"Error: {ex.Message}",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
 
         private void DisplayJson(string jsonResponse)
         {
             var json = JObject.Parse(jsonResponse);
-            
+
             StringBuilder formattedResult = new StringBuilder();
             formattedResult.AppendLine($"Title: {json["title"]}");
             formattedResult.AppendLine($"Subtitle: {json["subtitle"]}");
@@ -104,6 +115,5 @@ namespace StudentNotesFeedClient
 
             ContentTextBox.Text = formattedResult.ToString();
         }
-
     }
 }

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Diagnostics;
@@ -10,6 +9,7 @@ using System.ServiceModel.Syndication;
 using System.ServiceModel.Web;
 using System.Text;
 using System.Xml;
+using Newtonsoft.Json;
 using WSRAMModel;
 
 namespace WsRamSyndicationService
@@ -25,7 +25,11 @@ namespace WsRamSyndicationService
                 return new MemoryStream();
             }
 
-            string format = WebOperationContext.Current?.IncomingRequest?.UriTemplateMatch?.QueryParameters["format"];
+            string format = WebOperationContext
+                .Current
+                ?.IncomingRequest
+                ?.UriTemplateMatch
+                ?.QueryParameters["format"];
             bool usingAtom = format?.ToLower() == "atom";
 
             return usingAtom ? GetAtomFeed(studentIdParsed) : GetJsonResponse(studentIdParsed);
@@ -42,17 +46,21 @@ namespace WsRamSyndicationService
 
             var feed = new SyndicationFeed(feedData.Title, feedData.Subtitle, null)
             {
-                Items = feedData.Entries.Select(entry =>
-                    new SyndicationItem(
+                Items = feedData
+                    .Entries.Select(entry => new SyndicationItem(
                         title: entry.Title,
                         content: entry.Content,
                         itemAlternateLink: null
-                    )
-                ).ToList()
+                    ))
+                    .ToList(),
             };
 
-
-            using (var writer = XmlWriter.Create(memoryStream, new XmlWriterSettings { CloseOutput = false }))
+            using (
+                var writer = XmlWriter.Create(
+                    memoryStream,
+                    new XmlWriterSettings { CloseOutput = false }
+                )
+            )
             {
                 new Atom10FeedFormatter(feed).WriteTo(writer);
                 writer.Flush();
@@ -71,18 +79,20 @@ namespace WsRamSyndicationService
                 return new MemoryStream();
             }
 
-            string jsonResult = JsonConvert.SerializeObject(new
-            {
-                title = feedData.Title,
-                subtitle = feedData.Subtitle,
-                updated = feedData.Updated,
-                entries = feedData.Entries.Select(entry => new
+            string jsonResult = JsonConvert.SerializeObject(
+                new
                 {
-                    title = entry.Title,
+                    title = feedData.Title,
+                    subtitle = feedData.Subtitle,
                     updated = feedData.Updated,
-                    content = entry.Content
-                })
-            });
+                    entries = feedData.Entries.Select(entry => new
+                    {
+                        title = entry.Title,
+                        updated = feedData.Updated,
+                        content = entry.Content,
+                    }),
+                }
+            );
 
             WebOperationContext.Current.OutgoingResponse.ContentType = "application/json";
             return new MemoryStream(Encoding.UTF8.GetBytes(jsonResult));
@@ -115,11 +125,13 @@ namespace WsRamSyndicationService
                 Title = $"{student.name}'s Notes",
                 Subtitle = $"Notes of the student with ID {studentId}",
                 Updated = now,
-                Entries = notes.Select(note => new FeedEntry
-                {
-                    Title = $"#{note.id}",
-                    Content = $"{note.subj} - {note.note1}"
-                }).ToList()
+                Entries = notes
+                    .Select(note => new FeedEntry
+                    {
+                        Title = $"#{note.id}",
+                        Content = $"{note.subj} - {note.note1}",
+                    })
+                    .ToList(),
             };
         }
 

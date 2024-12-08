@@ -11,7 +11,9 @@ using System.ServiceModel.Activation;
 
 namespace Lab6
 {
-    [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed)]
+    [AspNetCompatibilityRequirements(
+        RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed
+    )]
     [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
     public class WsRamDataService : EntityFrameworkDataService<WSRAMEntities>
     {

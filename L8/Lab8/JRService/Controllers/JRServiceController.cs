@@ -120,7 +120,8 @@ namespace JRService.Controllers
                 JsonRpcParams jrpcParams;
                 try
                 {
-                    jrpcParams = (request.Params as JObject)?.ToObject(handler.ParamsType) as JsonRpcParams;
+                    jrpcParams =
+                        (request.Params as JObject)?.ToObject(handler.ParamsType) as JsonRpcParams;
                 }
                 catch (Exception)
                 {

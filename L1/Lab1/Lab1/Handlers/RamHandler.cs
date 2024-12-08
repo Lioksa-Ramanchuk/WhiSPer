@@ -1,7 +1,7 @@
-﻿using System.Web;
+﻿using System.Net;
+using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.SessionState;
-using System.Net;
 using Lab1.Models;
 
 namespace Lab1.Handlers
@@ -9,7 +9,7 @@ namespace Lab1.Handlers
     public class RamHandler : IHttpHandler, IRequiresSessionState
     {
         private static readonly string SessionRamStorageName = "Ram";
-        
+
         private static int _result = 0;
 
         private readonly JavaScriptSerializer _jsSerializer = new JavaScriptSerializer();
@@ -41,7 +41,9 @@ namespace Lab1.Handlers
 
         private void HandleGet(HttpContext context)
         {
-            var ramModel = GetObjectFromSession<RamModel>(context, _jsSerializer, SessionRamStorageName) ?? new RamModel();
+            var ramModel =
+                GetObjectFromSession<RamModel>(context, _jsSerializer, SessionRamStorageName)
+                ?? new RamModel();
             int result = _result;
             if (ramModel.StackCount != 0)
             {
@@ -68,7 +70,9 @@ namespace Lab1.Handlers
 
         private void HandlePut(HttpContext context)
         {
-            var ramModel = GetObjectFromSession<RamModel>(context, _jsSerializer, SessionRamStorageName) ?? new RamModel();
+            var ramModel =
+                GetObjectFromSession<RamModel>(context, _jsSerializer, SessionRamStorageName)
+                ?? new RamModel();
             if (!int.TryParse(context.Request.QueryString["add"], out int add))
             {
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
@@ -83,7 +87,9 @@ namespace Lab1.Handlers
 
         private void HandleDelete(HttpContext context)
         {
-            var ramModel = GetObjectFromSession<RamModel>(context, _jsSerializer, SessionRamStorageName) ?? new RamModel();
+            var ramModel =
+                GetObjectFromSession<RamModel>(context, _jsSerializer, SessionRamStorageName)
+                ?? new RamModel();
             if (ramModel.StackCount == 0)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
@@ -96,13 +102,22 @@ namespace Lab1.Handlers
             context.Response.StatusCode = (int)HttpStatusCode.OK;
         }
 
-        private static T GetObjectFromSession<T>(HttpContext context, JavaScriptSerializer jsSerializer, string name)
+        private static T GetObjectFromSession<T>(
+            HttpContext context,
+            JavaScriptSerializer jsSerializer,
+            string name
+        )
         {
             var json = context.Session[name] as string;
             return string.IsNullOrEmpty(json) ? default : jsSerializer.Deserialize<T>(json);
         }
 
-        private static void SetObjectIntoSession<T>(HttpContext context, JavaScriptSerializer jsSerializer, string name, T o)
+        private static void SetObjectIntoSession<T>(
+            HttpContext context,
+            JavaScriptSerializer jsSerializer,
+            string name,
+            T o
+        )
         {
             context.Session[name] = jsSerializer.Serialize(o);
         }

@@ -12,7 +12,11 @@ namespace WsRamSyndicationService
     public interface IStudentNotesFeed
     {
         [OperationContract]
-        [WebInvoke(Method = "GET", BodyStyle = WebMessageBodyStyle.Bare, UriTemplate = "/{studentId}")]
+        [WebInvoke(
+            Method = "GET",
+            BodyStyle = WebMessageBodyStyle.Bare,
+            UriTemplate = "/{studentId}"
+        )]
         Stream GetStudentNotes(string studentId);
     }
 }

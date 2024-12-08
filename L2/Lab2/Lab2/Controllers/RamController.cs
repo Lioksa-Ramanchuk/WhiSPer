@@ -1,12 +1,13 @@
-﻿using Lab2.Models;
-using System.Web;
+﻿using System.Web;
 using System.Web.Http;
+using Lab2.Models;
 
 namespace Lab2.Controllers
 {
     public class RamController : ApiController
     {
-        private static RamModel AppRamStorage => HttpContext.Current.Application[WebApiApplication.AppRamStorageName] as RamModel;
+        private static RamModel AppRamStorage =>
+            HttpContext.Current.Application[WebApiApplication.AppRamStorageName] as RamModel;
 
         public IHttpActionResult Get()
         {

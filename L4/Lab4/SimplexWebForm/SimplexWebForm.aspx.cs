@@ -29,13 +29,15 @@ namespace SimplexWebForm
                 {
                     throw new ArgumentException("y is invalid");
                 }
-                
+
                 var sum = _client.Add(xVal, yVal);
                 result.Text = sum.ToString();
             }
             catch (Exception ex)
             {
-                Response.Write($"<script>alert('Error: {ex.Message.Replace("'", "\\'")}')</script>");
+                Response.Write(
+                    $"<script>alert('Error: {ex.Message.Replace("'", "\\'")}')</script>"
+                );
             }
         }
     }
