@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 2</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <table class="table table-hover">
+      <tr class="tr">
+        <td><button type="button" class="btn btn-info btn-block" id="get-result-btn">Get result</button></td>
+        <td class="text-info">RESULT: <span id="result"></span></td>
+      </tr>
+      <tr>
+        <td><button type="button" class="btn btn-info btn-block" id="post-result-btn">Set result</button></td>
+        <td><input type="number" class="form-control" id="new-result" placeholder="New RESULT value."></td>
+      </tr>
+      <tr>
+        <td><button type="button" class="btn btn-info btn-block" id="push-to-stack-btn">Push value to stack</button>
+        </td>
+        <td><input type="number" class="form-control" id="new-add" placeholder="New ADD value."></td>
+      </tr>
+      <tr>
+        <td><button type="button" class="btn btn-info btn-block" id="pop-from-stack-btn">Pop value from stack</button>
+        </td>
+        <td></td>
+      </tr>
+    </table>
+
+    <p class="text-danger" id="error-msg"></p>
+  </div>
+
+  <script>
+    const url = 'http://localhost:8002/api/ram';
+
+    $('#get-result-btn').on('click', function () { getResult(); });
+    $('#post-result-btn').on('click', function () { postResult(); });
+    $('#push-to-stack-btn').on('click', function () { pushToStack(); });
+    $('#pop-from-stack-btn').on('click', function () { popFromStack(); });
+
+    getResult();
+
+    function getResult() {
+      $.ajax({
+        url: url,
+        type: 'GET',
+        success: function (data) {
+          $('#result').text(data.result);
+          clearError();
+        },
+        error: function (xhr) {
+          handleError(xhr);
+        }
+      });
+    }
+
+    function postResult() {
+      const newResult = $('#new-result').val();
+      $.ajax({
+        url: `${url}?result=${newResult}`,
+        type: 'POST',
+        success: function () {
+          getResult();
+          clearError();
+        },
+        error: function (xhr) {
+          handleError(xhr);
+        }
+      });
+    }
+
+    function pushToStack() {
+      const newAdd = $('#new-add').val();
+      $.ajax({
+        url: `${url}?add=${newAdd}`,
+        type: 'PUT',
+        success: function () {
+          getResult();
+          clearError();
+        },
+        error: function (xhr) {
+          handleError(xhr);
+        }
+      });
+    }
+
+    function popFromStack() {
+      $.ajax({
+        url: url,
+        type: 'DELETE',
+        success: function () {
+          getResult();
+          clearError();
+        },
+        error: function (xhr) {
+          handleError(xhr);
+        }
+      });
+    }
+
+    function handleError(xhr) {
+      let errorMessage;
+      try {
+        const response = JSON.parse(xhr.responseText);
+        if (response.Message) {
+          errorMessage = response.Message;
+        }
+      } catch (e) {
+        errorMessage = xhr.responseText;
+      }
+      $('#error-msg').text(`Error ${xhr.status}: ${errorMessage}`);
+    }
+
+
+    function clearError() {
+      $('#error-msg').text('');
+    }
+  </script>
+</body>
+
+</html>

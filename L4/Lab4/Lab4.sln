@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simplex", "Simplex\Simplex.csproj", "{4AF427D4-333D-42A2-B97F-79D8E98B40C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplexSumForm", "SimplexSumForm\SimplexSumForm.csproj", "{FE19C092-86FC-42EE-94EF-277A75B2500F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4AF427D4-333D-42A2-B97F-79D8E98B40C7} = {4AF427D4-333D-42A2-B97F-79D8E98B40C7}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplexProxyForm", "SimplexProxyForm\SimplexProxyForm.csproj", "{D5851F1B-D7D2-4FDE-941D-135A5F19C1CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplexWebForm", "SimplexWebForm\SimplexWebForm.csproj", "{2C886F93-10FD-428D-846A-9200AB311D9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimplexWeb", "SimplexWeb\SimplexWeb.csproj", "{8B5F861B-6521-4C3A-96CF-4024A7D13156}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4AF427D4-333D-42A2-B97F-79D8E98B40C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AF427D4-333D-42A2-B97F-79D8E98B40C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AF427D4-333D-42A2-B97F-79D8E98B40C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AF427D4-333D-42A2-B97F-79D8E98B40C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE19C092-86FC-42EE-94EF-277A75B2500F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE19C092-86FC-42EE-94EF-277A75B2500F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE19C092-86FC-42EE-94EF-277A75B2500F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE19C092-86FC-42EE-94EF-277A75B2500F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5851F1B-D7D2-4FDE-941D-135A5F19C1CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5851F1B-D7D2-4FDE-941D-135A5F19C1CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5851F1B-D7D2-4FDE-941D-135A5F19C1CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5851F1B-D7D2-4FDE-941D-135A5F19C1CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C886F93-10FD-428D-846A-9200AB311D9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C886F93-10FD-428D-846A-9200AB311D9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C886F93-10FD-428D-846A-9200AB311D9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C886F93-10FD-428D-846A-9200AB311D9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B5F861B-6521-4C3A-96CF-4024A7D13156}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B5F861B-6521-4C3A-96CF-4024A7D13156}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B5F861B-6521-4C3A-96CF-4024A7D13156}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B5F861B-6521-4C3A-96CF-4024A7D13156}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E92C7636-FC86-42C3-8B7B-BA2973BA472F}
+	EndGlobalSection
+EndGlobal

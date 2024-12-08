@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JRService", "JRService\JRService.csproj", "{53404AEA-111E-45DB-B136-4605914BAFD7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53404AEA-111E-45DB-B136-4605914BAFD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53404AEA-111E-45DB-B136-4605914BAFD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53404AEA-111E-45DB-B136-4605914BAFD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53404AEA-111E-45DB-B136-4605914BAFD7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D771745F-74ED-4ABF-95BB-BEED7186F1D8}
+	EndGlobalSection
+EndGlobal

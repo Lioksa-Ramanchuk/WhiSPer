@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 1</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+
+<body>
+  <div class="container">
+    <table class="table table-hover">
+      <tr class="tr">
+        <td><button type="button" class="btn btn-info btn-block" id="get-result-btn">Get result</button></td>
+        <td class="text-info">RESULT: <span id="result"></span></td>
+      </tr>
+      <tr>
+        <td><button type="button" class="btn btn-info btn-block" id="post-result-btn">Set result</button></td>
+        <td><input type="number" class="form-control" id="new-result" placeholder="New RESULT value."></td>
+      </tr>
+      <tr>
+        <td><button type="button" class="btn btn-info btn-block" id="push-to-stack-btn">Push value to stack</button>
+        </td>
+        <td><input type="number" class="form-control" id="new-add" placeholder="New ADD value."></td>
+      </tr>
+      <tr>
+        <td><button type="button" class="btn btn-info btn-block" id="pop-from-stack-btn">Pop value from stack</button>
+        </td>
+        <td></td>
+      </tr>
+    </table>
+
+    <p class="text-danger" id="error-msg"></p>
+  </div>
+
+  <script>
+    const url = 'http://localhost:8001/ram';
+    const query = document.querySelector.bind(document);
+
+    query('#get-result-btn').onclick = async () => await getResult();
+    query('#post-result-btn').onclick = async () => await postResult();
+    query('#push-to-stack-btn').onclick = async () => await pushToStack();
+    query('#pop-from-stack-btn').onclick = async () => await popFromStack();
+
+    getResult();
+
+    async function getResult() {
+      const response = await fetch(`${url}`);
+      if (!response.ok) {
+        return await handleError(response);
+      } else {
+        clearError();
+      }
+      const data = await response.json();
+      query('#result').innerText = `${data.Result}`;
+    }
+
+    async function postResult() {
+      const newResult = query('#new-result').value;
+      const response = await fetch(`${url}?result=${newResult}`, { method: 'POST' });
+      if (!response.ok) {
+        return await handleError(response);
+      } else {
+        clearError();
+      }
+      await getResult();
+    }
+
+    async function pushToStack() {
+      const newAdd = query('#new-add').value;
+      const response = await fetch(`${url}?add=${newAdd}`, { method: 'PUT' });
+      if (!response.ok) {
+        return await handleError(response);
+      } else {
+        clearError();
+      }
+      await getResult();
+    }
+
+    async function popFromStack() {
+      const response = await fetch(`${url}`, { method: 'DELETE' });
+      if (!response.ok) {
+        return await handleError(response);
+      } else {
+        clearError();
+      }
+      await getResult();
+    }
+
+    async function handleError(response) {
+      let errorMessage;
+      try {
+        const errorResponse = await response.json();
+        if (errorResponse.Message) {
+          errorMessage = errorResponse.Message;
+        }
+      } catch (e) {
+        errorMessage = await response.text();
+      }
+      query('#error-msg').innerText = `Error ${response.status}: ${errorMessage}`;
+    }
+
+    function clearError() {
+      query('#error-msg').innerText = '';
+    }
+  </script>
+</body>
+
+</html>

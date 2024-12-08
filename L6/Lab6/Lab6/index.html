@@ -1,0 +1,335 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WCF Data Service Client</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+  <div class="container mt-4 mb-5">
+    <h1 class="mb-4">WSRAM - WCF Data Service Client</h1>
+
+    <h3 class="mb-3">Students</h4>
+
+      <section class="mb-4 p-3 border rounded shadow-sm bg-light">
+        <form id="filterForm" class="row gy-2 gx-3 align-items-center">
+          <div class="col-auto">
+            <input type="text" id="primaryKey" class="form-control" placeholder="PK (1)" />
+          </div>
+          <div class="col-auto">
+            <input type="text" id="filter" class="form-control" placeholder="$filter (name eq 'Name')" />
+          </div>
+          <div class="col-auto">
+            <input type="text" id="select" class="form-control" placeholder="$select (id,name)" />
+          </div>
+          <div class="col-auto">
+            <input type="text" id="orderby" class="form-control" placeholder="$orderby (name desc)" />
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filter</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="mb-3 p-3 border rounded shadow-sm bg-light">
+        <form id="studentForm">
+          <input type="hidden" id="studentId" />
+          <div class="row gy-2 gx-3 align-items-center">
+            <div class="col-auto">
+              <input type="text" id="studentName" class="form-control" placeholder="Student Name" required />
+            </div>
+            <div class="col-auto">
+              <button type="submit" id="saveStudentButton" class="btn btn-success">Add Student</button>
+            </div>
+            <div class="col-auto">
+              <button type="button" id="clearStudentForm" class="btn btn-secondary">Clear</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <section class="mb-4">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover" id="studentTable">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <h3 id="notes-caption" class="mb-3">Notes</h4>
+
+        <section class="mb-3 p-3 border rounded shadow-sm bg-light">
+          <form id="noteForm">
+            <input type="hidden" id="noteId" />
+            <div class="row gy-2 gx-3 align-items-center">
+              <div class="col-auto">
+                <input type="text" id="noteSubject" class="form-control" placeholder="Subject" required />
+              </div>
+              <div class="col-auto">
+                <input type="number" id="noteValue" class="form-control" placeholder="Note Value" required />
+              </div>
+              <div class="col-auto">
+                <button type="submit" id="saveNoteButton" class="btn btn-success">Add Note</button>
+              </div>
+              <div class="col-auto">
+                <button type="button" id="clearNoteForm" class="btn btn-secondary">Clear</button>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <section class="mb-4">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="notesTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Subject</th>
+                  <th>Note</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:56570/WsRamDataService.svc';
+
+    $(document).ready(() => {
+      setupEventHandlers();
+      loadStudents();
+      updateSaveNoteButtonState();
+    });
+
+    function setupEventHandlers() {
+      $('#primaryKey').on('input', toggleFilterInputState);
+      $('#filterForm').on('submit', handleFilterFormSubmit);
+      $('#studentForm').on('submit', handleStudentFormSubmit);
+      $('#clearStudentForm').on('click', resetStudentForm);
+      $('#noteForm').on('submit', handleNoteFormSubmit);
+      $('#clearNoteForm').on('click', resetNoteForm);
+    }
+
+    function toggleFilterInputState() {
+      const isPrimaryKeySet = $(this).val().trim() !== '';
+      $('#filter, #orderby').prop('disabled', isPrimaryKeySet);
+    }
+
+    function handleFilterFormSubmit(event) {
+      event.preventDefault();
+      refreshStudentList();
+    }
+
+    function refreshStudentList() {
+      const query = buildQueryString({
+        primaryKey: $('#primaryKey').val(),
+        filter: $('#filter').val(),
+        select: $('#select').val(),
+        orderby: $('#orderby').val(),
+      });
+      loadStudents(query, $('#select').val());
+    }
+
+    function buildQueryString({ primaryKey, filter, select, orderby }) {
+      const queryParams = [];
+
+      if (primaryKey) {
+        return `(${primaryKey})`;
+      }
+
+      if (filter) queryParams.push(`$filter=${filter}`);
+      if (orderby) queryParams.push(`$orderby=${orderby}`);
+      if (select) queryParams.push(`$select=${select}`);
+
+      return queryParams.length ? `?${queryParams.join('&')}` : '';
+    }
+
+    function loadStudents(query = '', selectedColumns = '') {
+      sendApiRequest(
+        `${API_BASE_URL}/Students${query}`,
+        'GET',
+        null,
+        (data) => renderStudentTable(data.value || [data], selectedColumns),
+        'Failed to load students!'
+      );
+    }
+
+    function renderStudentTable(students, selectedColumns) {
+      const columns = selectedColumns
+        ? selectedColumns.split(',').map((col) => col.trim())
+        : ['id', 'name'];
+
+      const hasActions = columns.includes('id');
+      const headers = [...columns, hasActions ? 'Actions' : '']
+        .filter(Boolean)
+        .map((col) => `<th>${col.toUpperCase()}</th>`)
+        .join('');
+
+      $('#studentTable thead').html(`<tr>${headers}</tr>`);
+
+      const rows = students.map((student) => {
+        const cells = columns.map((col) => `<td>${student[col]}</td>`).join('');
+        const actions = hasActions
+          ? `
+            <td>
+              <button class="btn btn-primary btn-sm" onclick="loadNotes(${student.id})">View Notes</button>
+              <button class="btn btn-warning btn-sm" onclick="editStudent(${student.id}, '${student.name}')">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteStudent(${student.id})">Delete</button>
+            </td>
+          `
+          : '';
+        return `<tr>${cells}${actions}</tr>`;
+      });
+
+      $('#studentTable tbody').html(rows.join(''));
+    }
+
+    function handleStudentFormSubmit(event) {
+      event.preventDefault();
+      const studentId = $('#studentId').val();
+      const studentData = { name: $('#studentName').val() };
+      const isEditing = !!studentId;
+
+      sendApiRequest(
+        `${API_BASE_URL}/Students${isEditing ? `(${studentId})` : ''}`,
+        isEditing ? 'PUT' : 'POST',
+        studentData,
+        () => {
+          resetStudentForm();
+          refreshStudentList();
+        },
+        'Failed to save the student!'
+      );
+    }
+
+    function resetStudentForm() {
+      $('#studentId').val('');
+      $('#studentName').val('');
+      $('#saveStudentButton').text('Add Student');
+    }
+
+    function editStudent(studentId, studentName) {
+      $('#studentId').val(studentId);
+      $('#studentName').val(studentName);
+      $('#saveStudentButton').text('Save Student');
+    }
+
+    function deleteStudent(studentId) {
+      if (!confirm('Are you sure you want to delete this student?')) return;
+
+      sendApiRequest(
+        `${API_BASE_URL}/Students(${studentId})`,
+        'DELETE',
+        null,
+        () => {
+          resetStudentForm();
+          refreshStudentList();
+        },
+        'Failed to delete the student!'
+      );
+    }
+
+    function handleNoteFormSubmit(event) {
+      event.preventDefault();
+      const noteId = $('#noteId').val();
+      const studentId = $('#studentId').val();
+      const noteData = {
+        subj: $('#noteSubject').val(),
+        note1: parseInt($('#noteValue').val()),
+        student_id: studentId,
+      };
+
+      sendApiRequest(
+        `${API_BASE_URL}/Notes${noteId ? `(${noteId})` : `/Students(${studentId})/Notes`}`,
+        noteId ? 'PUT' : 'POST',
+        noteData,
+        () => {
+          resetNoteForm();
+          loadNotes(studentId);
+        },
+        'Failed to save the note!'
+      );
+    }
+
+    function resetNoteForm() {
+      $('#noteId').val('');
+      $('#noteSubject').val('');
+      $('#noteValue').val('');
+      $('#saveNoteButton').text('Add Note');
+    }
+
+    function loadNotes(studentId) {
+      sendApiRequest(
+        `${API_BASE_URL}/Students(${studentId})/Notes`,
+        'GET',
+        null,
+        (data) => {
+          $('#notes-caption').text(`Notes (Student ID: ${studentId})`);
+          renderNotesTable(data.value);
+          resetNoteForm();
+        },
+        'Failed to load notes!'
+      );
+    }
+
+    function renderNotesTable(notes) {
+      const rows = notes
+        .map(
+          (note) => `
+            <tr>
+              <td>${note.id}</td>
+              <td>${note.subj}</td>
+              <td>${note.note1}</td>
+              <td>
+                <button class="btn btn-warning btn-sm" onclick="editNote(${note.id}, '${note.subj}', ${note.note1})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteNote(${note.id})">Delete</button>
+              </td>
+            </tr>
+          `
+        )
+        .join('');
+      $('#notesTable tbody').html(rows);
+    }
+
+    function editNote(noteId, subject, noteValue) {
+      $('#noteId').val(noteId);
+      $('#noteSubject').val(subject);
+      $('#noteValue').val(noteValue);
+      $('#saveNoteButton').text('Save Note');
+    }
+
+    function deleteNote(noteId) {
+      if (!confirm('Are you sure you want to delete this note?')) return;
+
+      sendApiRequest(
+        `${API_BASE_URL}/Notes(${noteId})`,
+        'DELETE',
+        null,
+        () => loadNotes($('#studentId').val()),
+        'Failed to delete note!'
+      );
+    }
+
+    function sendApiRequest(url, method, data, successCallback, errorMessage) {
+      $.ajax({
+        url,
+        method,
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        data: data ? JSON.stringify(data) : undefined,
+        success: successCallback,
+        error: (err) => console.error(errorMessage, err),
+      });
+    }
+  </script>
+</body>
+
+</html>

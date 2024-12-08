@@ -1,0 +1,621 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 3</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    .form-section {
+      margin-bottom: 1.5em;
+    }
+
+    .btn {
+      margin: 0.2em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row mt-4">
+      <div class="col-lg-6 col-md-12 form-section">
+        <h2 class="mt-3">Settings</h2>
+        <label for="settings__format" class="form-label">Data Format</label>
+        <select class="form-select" id="settings__format">
+          <option value="json" selected>JSON</option>
+          <option value="xml">XML</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-lg-6 col-md-12 form-section">
+        <h2 class="mt-3">Students List</h2>
+        <div class="form-row">
+          <div class="mb-3">
+            <label for="studentsList__offset" class="form-label">Offset</label>
+            <input type="number" class="form-control" id="studentsList__offset" value="0" min="0" required>
+          </div>
+          <div class="mb-3">
+            <label for="studentsList__limit" class="form-label">Limit</label>
+            <input type="number" class="form-control" id="studentsList__limit" value="10" min="1" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="mb-3">
+            <label for="studentsList__sortSelect" class="form-label">Sort By</label>
+            <select class="form-select" id="studentsList__sortSelect">
+              <option value="id" selected>ID</option>
+              <option value="name">Name</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="studentsList__sortOrder" class="form-label">Sort Order</label>
+            <select class="form-select" id="studentsList__sortOrder">
+              <option value="asc" selected>Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="mb-3">
+            <label for="studentsList__minId" class="form-label">Min ID</label>
+            <input type="number" class="form-control" id="studentsList__minId">
+          </div>
+          <div class="mb-3">
+            <label for="studentsList__maxId" class="form-label">Max ID</label>
+            <input type="number" class="form-control" id="studentsList__maxId">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="mb-3">
+            <label for="studentsList__likeExpression" class="form-label">Name Like Expression</label>
+            <input type="text" class="form-control" id="studentsList__likeExpression">
+          </div>
+          <div class="mb-3">
+            <label for="studentsList__globalLikeExpression" class="form-label">Global Like Expression</label>
+            <input type="text" class="form-control" id="studentsList__globalLikeExpression">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label>Select Columns:</label>
+          <div>
+            <input type="checkbox" id="studentsList__selectColumns_id" checked>
+            <label for="studentsList__selectColumns_id">ID</label>
+          </div>
+          <div>
+            <input type="checkbox" id="studentsList__selectColumns_name" checked>
+            <label for="studentsList__selectColumns_name">Name</label>
+          </div>
+          <div>
+            <input type="checkbox" id="studentsList__selectColumns_phone" checked>
+            <label for="studentsList__selectColumns_phone">Phone</label>
+          </div>
+        </div>
+        <div class="form-row">
+          <button class="btn btn-primary" type="submit" id="studentsList__prevButton" disabled>&lt;</button>
+          <button class="btn btn-primary" type="submit" id="studentsList__searchButton">Search</button>
+          <button class="btn btn-primary" type="submit" id="studentsList__nextButton" disabled>&gt;</button>
+        </div>
+
+        <table class="table mt-3" id="studentsList__resultsTable">
+          <thead>
+            <tr id="studentsList__resultsTable_headers"></tr>
+          </thead>
+          <tbody id="studentsList__resultsTable_body"></tbody>
+        </table>
+      </div>
+
+      <div class="col-lg-6 col-md-12 form-section">
+        <h2 class="mt-3">Student</h2>
+        <div class="mb-3">
+          <label for="studentForm__id" class="form-label">Student ID</label>
+          <input type="number" class="form-control" id="studentForm__id">
+        </div>
+        <button class="btn btn-primary" type="submit" id="studentForm__getStudentButton">Get Student</button>
+        <button class="btn btn-success" type="submit" id="studentForm__addStudentButton">Add Student</button>
+        <button class="btn btn-warning" type="submit" id="studentForm__updateStudentButton">Update Student</button>
+        <button class="btn btn-danger" type="submit" id="studentForm__removeStudentButton">Remove Student</button>
+
+        <div class="mb-3 mt-3">
+          <label for="studentForm__name" class="form-label">Name</label>
+          <input type="text" class="form-control" id="studentForm__name" required>
+        </div>
+        <div class="mb-3">
+          <label for="studentForm__phone" class="form-label">Phone</label>
+          <input type="text" class="form-control" id="studentForm__phone" required>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="updateStudentModal" tabindex="-1"
+    aria-labelledby="updateStudentModal__updateStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateStudentModal__updateStudentModalLabel">Update Student</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="updateStudentModal__updateStudentForm">
+            <input type="hidden" id="updateStudentModal__studentId" />
+            <div class="mb-3">
+              <label for="updateStudentModal__studentName" class="form-label">Name</label>
+              <input type="text" class="form-control" id="updateStudentModal__studentName" required>
+            </div>
+            <div class="mb-3">
+              <label for="updateStudentModal__studentPhone" class="form-label">Phone</label>
+              <input type="text" class="form-control" id="updateStudentModal__studentPhone" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Student</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    //#region Students List
+
+    $('#studentsList__searchButton').click(function () {
+      const format = $('#settings__format').val();
+      const offset = $('#studentsList__offset').val();
+      const limit = $('#studentsList__limit').val();
+      const sort = $('#studentsList__sortSelect').val();
+      const sortOrder = $('#studentsList__sortOrder').val();
+      const minid = $('#studentsList__minId').val();
+      const maxid = $('#studentsList__maxId').val();
+      const like = $('#studentsList__likeExpression').val();
+      const globalike = $('#studentsList__globalLikeExpression').val();
+      const columns = [
+        $('#studentsList__selectColumns_id').is(':checked') ? 'ID' : null,
+        $('#studentsList__selectColumns_name').is(':checked') ? 'NAME' : null,
+        $('#studentsList__selectColumns_phone').is(':checked') ? 'PHONE' : null,
+      ].filter(Boolean).join(',');
+
+      const queryParameters = buildQueryParameters(offset, limit, sort, sortOrder, minid, maxid, like, globalike, columns);
+
+      getStudents(`/api/students.${format}?${queryParameters}`, format, (data) => renderStudentsAndLinks(data, format));
+    });
+
+    $('#studentsList__prevButton').click(function () {
+      if (currentStudentsListOffset > 0) {
+        currentStudentsListOffset = Math.max(0, currentStudentsListOffset - currentStudentsListLimit);
+        $('#studentsList__offset').val(currentStudentsListOffset);
+        $('#studentsList__searchButton').click();
+      }
+    });
+
+    $('#studentsList__nextButton').click(function () {
+      currentStudentsListOffset += currentStudentsListLimit;
+      $('#studentsList__offset').val(currentStudentsListOffset);
+      $('#studentsList__searchButton').click();
+    });
+
+    function updateSearchPaginationLinks(links, format) {
+      const prevLink = links.find(link => link.rel === 'prev');
+      const nextLink = links.find(link => link.rel === 'next');
+
+      if (prevLink) {
+        $('#studentsList__prevButton').removeAttr('disabled').off('click').on('click', function () {
+          getStudents(prevLink.href, format, (data) => renderStudentsAndLinks(data, format));
+        });
+      } else {
+        $('#studentsList__prevButton').attr('disabled', true).off('click');
+      }
+
+      if (nextLink) {
+        $('#studentsList__nextButton').removeAttr('disabled').off('click').on('click', function () {
+          getStudents(nextLink.href, format, (data) => renderStudentsAndLinks(data, format));
+        });
+      } else {
+        $('#studentsList__nextButton').attr('disabled', true).off('click');
+      }
+    }
+
+    function renderStudentsAndLinks(data, format) {
+      const columns = [
+        $('#studentsList__selectColumns_id').is(':checked') ? 'ID' : null,
+        $('#studentsList__selectColumns_name').is(':checked') ? 'NAME' : null,
+        $('#studentsList__selectColumns_phone').is(':checked') ? 'PHONE' : null,
+      ].filter(Boolean);
+
+      $('#studentsList__resultsTable_headers').empty();
+      $('#studentsList__resultsTable_body').empty();
+
+      columns.forEach(column => {
+        $('#studentsList__resultsTable_headers').append(`<th>${column}</th>`);
+      });
+      $('#studentsList__resultsTable_headers').append('<th>Actions</th>');
+
+      data.students.forEach(student => {
+        const row = $('<tr></tr>');
+
+        if (columns.includes('ID')) {
+          row.append(`<td>${student.id}</td>`);
+        }
+        if (columns.includes('NAME')) {
+          row.append(`<td>${student.name}</td>`);
+        }
+        if (columns.includes('PHONE')) {
+          row.append(`<td>${student.phone}</td>`);
+        }
+
+        const actions = $('<td></td>');
+        student.links.forEach(link => {
+          if (link.rel === 'self') {
+            actions.append(`<a href="#" class="btn btn-info" onclick="viewStudentOnLink('${link.href}', '${format}')">View</a>`);
+          }
+          if (link.rel === 'update') {
+            actions.append(`<a href="#" class="btn btn-warning" onclick="showUpdateStudentModalOnLink('${link.href}', '${format}', ${student.name ? `'${student.name}'` : 'undefined'}, ${student.phone ? `'${student.phone}'` : 'undefined'})">Update</a>`);
+          }
+          if (link.rel === 'delete') {
+            actions.append(`<a href="#" class="btn btn-danger" onclick="removeStudentOnLink('${link.href}', '${format}')">Remove</a>`);
+          }
+        });
+        row.append(actions);
+
+        $('#studentsList__resultsTable_body').append(row);
+      });
+
+      updateSearchPaginationLinks(data.links, format);
+    }
+
+    function viewStudentOnLink(href, format) {
+      getStudent(href, format, (data) => {
+        alert(`ID: ${data.id}\nName: ${data.name}\nPhone: ${data.phone}`);
+      });
+    }
+
+    function showUpdateStudentModalOnLink(href, format, name, phone) {
+      $('#updateStudentModal__studentName').val(name || '');
+      $('#updateStudentModal__studentPhone').val(phone || '');
+      $('#updateStudentModal__updateStudentForm').off('submit').on('submit', function (e) {
+        e.preventDefault();
+        updateStudentFromModal(href);
+      });
+      $('#updateStudentModal').modal('show');
+    }
+
+    function updateStudentFromModal(href, format) {
+      const name = $('#updateStudentModal__studentName').val();
+      const phone = $('#updateStudentModal__studentPhone').val();
+
+      updateStudent(href, format, name, phone, (data) => {
+        $('#updateStudentModal').modal('hide');
+        $('#studentsList__searchButton').click();
+      });
+    }
+
+    function removeStudentOnLink(href, format) {
+      removeStudent(href, format, (data) => {
+        $('#studentsList__searchButton').click();
+      });
+    }
+
+    function buildQueryParameters(offset, limit, sort, sortOrder, minid, maxid, like, globalike, columns) {
+      sort = (sortOrder === 'asc' ? '+' : '-') + sort;
+      return `offset=${encodeURIComponent(offset)}&limit=${encodeURIComponent(limit)}` +
+        (sort ? `&sort=${encodeURIComponent(sort)}` : '') +
+        (minid ? `&minid=${encodeURIComponent(minid)}` : '') +
+        (maxid ? `&maxid=${encodeURIComponent(maxid)}` : '') +
+        (columns ? `&columns=${encodeURIComponent(columns)}` : '') +
+        (like ? `&like=${encodeURIComponent(like)}` : '') +
+        (globalike ? `&globalike=${encodeURIComponent(globalike)}` : '');
+    }
+
+    //#endregion
+
+    //#region Student
+
+    $('#studentForm__getStudentButton').click(function () {
+      const id = $('#studentForm__id').val();
+      if (!id) {
+        alert('Please enter a student ID.');
+        return;
+      }
+      const format = $('#settings__format').val();
+
+      getStudent(`/api/students.${format}/${id}`, format, (data) => {
+        fillStudentFields(data);
+      });
+    });
+
+    $('#studentForm__addStudentButton').click(function () {
+      const name = $('#studentForm__name').val();
+      if (!name) {
+        alert('Please enter a student name.');
+        return;
+      }
+      const phone = $('#studentForm__phone').val();
+      if (!phone) {
+        alert('Please enter a student phone.');
+        return;
+      }
+      const format = $('#settings__format').val();
+
+      postStudent(`/api/students.${format}`, format, name, phone, (data) => {
+        fillStudentFields(data);
+      });
+    });
+
+    $('#studentForm__updateStudentButton').click(function () {
+      const id = $('#studentForm__id').val();
+      if (!id) {
+        alert('Please enter a student ID to update.');
+        return;
+      }
+      const name = $('#studentForm__name').val();
+      const phone = $('#studentForm__phone').val();
+      const format = $('#settings__format').val();
+
+      updateStudent(`/api/students.${format}/${id}`, format, name, phone, (data) => {
+        fillStudentFields(data);
+      });
+    });
+
+    $('#studentForm__removeStudentButton').click(function () {
+      const id = $('#studentForm__id').val();
+      if (!id) {
+        alert('Please enter a student ID to remove.');
+        return;
+      }
+      const format = $('#settings__format').val();
+
+      removeStudent(`/api/students.${format}/${id}`, format, (data) => {
+        fillStudentFields(data);
+        $('#studentForm__id').val('');
+        $('#studentForm__name').val('');
+        $('#studentForm__phone').val('');
+      });
+    });
+
+    function fillStudentFields(student) {
+      $('#studentForm__id').val(student.id);
+      $('#studentForm__name').val(student.name);
+      $('#studentForm__phone').val(student.phone);
+    }
+
+    //#endregion
+
+    //#region Common
+
+    function getStudent(href, format, onSuccess) {
+      $.ajax({
+        url: href,
+        method: 'GET',
+        dataType: format,
+        success: function (data) {
+          if (format === 'xml') {
+            data = parseStudentResponseModel(data);
+          }
+          onSuccess(data);
+        },
+        error: (jqXHR) => handleError(jqXHR, format)
+      });
+    }
+
+    function getStudents(href, format, onSuccess) {
+      $.ajax({
+        url: href,
+        method: 'GET',
+        dataType: format,
+        success: function (data) {
+          if (format === 'xml') {
+            data = parseStudentsListResponseModel(data);
+          }
+          onSuccess(data);
+        },
+        error: (jqXHR) => handleError(jqXHR, format)
+      });
+    }
+
+    function postStudent(href, format, name, phone, onSuccess) {
+      let data = { name, phone };
+      if (format === 'xml') {
+        data = objToXml(data, 'StudentAddReplaceRequestModel');
+      } else {
+        data = JSON.stringify(data);
+      }
+
+      const contentType = format === 'xml' ? 'application/xml' : 'application/json';
+
+      $.ajax({
+        url: href,
+        method: 'POST',
+        contentType: contentType,
+        data: data,
+        dataType: format,
+        success: function (data) {
+          if (format === 'xml') {
+            data = parseStudentResponseModel(data);
+          }
+          onSuccess(data);
+          alert('The student was added successfully.');
+        },
+        error: (jqXHR) => handleError(jqXHR, format)
+      });
+    }
+
+    function updateStudent(href, format, name, phone, onSuccess) {
+      let data = { name, phone };
+      if (format === 'xml') {
+        data = objToXml(data, 'StudentAddReplaceRequestModel');
+      } else {
+        data = JSON.stringify(data);
+      }
+
+      const contentType = format === 'xml' ? 'application/xml' : 'application/json';
+
+      $.ajax({
+        url: href,
+        method: 'PUT',
+        contentType: contentType,
+        data: data,
+        dataType: format,
+        success: function (data) {
+          if (format === 'xml') {
+            data = parseStudentResponseModel(data);
+          }
+          onSuccess(data);
+          alert('The student was updated successfully.');
+        },
+        error: (jqXHR) => handleError(jqXHR, format)
+      });
+    }
+
+    function removeStudent(href, format, onSuccess) {
+      if (!confirm('Are you sure you want to remove this student?')) {
+        return;
+      }
+
+      $.ajax({
+        url: href,
+        method: 'DELETE',
+        dataType: format,
+        success: function (data) {
+          if (format === 'xml') {
+            data = parseStudentResponseModel(data);
+          }
+          onSuccess(data);
+          alert('The student was removed successfully.');
+        },
+        error: (jqXHR) => handleError(jqXHR, format)
+      });
+    }
+
+    function handleError(jqXHR, format) {
+      let data;
+      if (format === 'xml') {
+        data = parseErrorResponseModel(jqXHR.responseXML);
+      } else {
+        data = jqXHR.responseJSON;
+      }
+      const errorCode = data?.code;
+      if (errorCode == null) {
+        alert('An unknown error occurred.');
+        return;
+      }
+      $.ajax({
+        url: `/api/errors.${format}/${errorCode}`,
+        method: 'GET',
+        dataType: format,
+        success: function (data) {
+          if (format === 'xml') {
+            data = parseErrorDetailsResponseModel(data);
+          }
+          alert(data.message);
+        },
+        error: (jqXHR) => handleError(jqXHR, format)
+      });
+    }
+
+    function parseErrorDetailsResponseModel(xml) {
+      const code = parseInt(xml.querySelector('Code').textContent);
+      const message = xml.querySelector('Message').textContent;
+
+      return {
+        code: code,
+        message: message
+      };
+    }
+
+    function parseErrorResponseModel(xml) {
+      const code = parseInt(xml.querySelector('Code').textContent);
+      const links = Array.from(xml.querySelectorAll('Links>LinkResponseModel')).map(link => parseLinkResponseModel(link));
+
+      return {
+        code: code,
+        links: links
+      };
+    }
+
+    function parseLinkResponseModel(xml) {
+      const href = xml.querySelector('Href').textContent;
+      const rel = xml.querySelector('Rel').textContent;
+      const method = xml.querySelector('Method').textContent;
+
+      return {
+        href: href,
+        rel: rel,
+        method: method
+      };
+    }
+
+    function parseLinkResponseModel(xml) {
+      const href = xml.querySelector('Href').textContent;
+      const rel = xml.querySelector('Rel').textContent;
+      const method = xml.querySelector('Method').textContent;
+
+      return {
+        href: href,
+        rel: rel,
+        method: method
+      };
+    }
+
+    function parseStudentResponseModel(xml) {
+      const id = xml.querySelector('Id') ? parseInt(xml.querySelector('Id').textContent) : null;
+      const name = xml.querySelector('Name') ? xml.querySelector('Name').textContent : null;
+      const phone = xml.querySelector('Phone') ? xml.querySelector('Phone').textContent : null;
+      const links = Array.from(xml.querySelectorAll('Links>LinkResponseModel')).map(link => parseLinkResponseModel(link));
+
+      return {
+        id: id,
+        name: name,
+        phone: phone,
+        links: links
+      };
+    }
+
+    function parseStudentsListResponseModel(xml) {
+      const students = Array.from(xml.querySelectorAll('Students>StudentResponseModel')).map(studentXml => parseStudentResponseModel(studentXml));
+      const links = Array.from(xml.querySelectorAll('StudentsListResponseModel>Links>LinkResponseModel')).map(link => parseLinkResponseModel(link));
+      return {
+        students: students,
+        links: links
+      };
+    }
+
+    function objToXml(jsonObj, rootName) {
+      const toPascalCase = str => str.charAt(0).toUpperCase() + str.slice(1);
+
+      const escapeXml = str => {
+        if (typeof str !== 'string') {
+          return str;
+        }
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      };
+
+      const jsonToXmlRecursive = (obj, root) => {
+        if (Array.isArray(obj)) {
+          return obj.map(item => `<${toPascalCase(root)}>${jsonToXmlRecursive(item, root)}</${toPascalCase(root)}>`)
+            .join('');
+        } else if (obj && typeof obj === 'object') {
+          return Object.entries(obj).map(([key, value]) =>
+            `<${toPascalCase(key)}>${jsonToXmlRecursive(value, key)}</${toPascalCase(key)}>`
+          ).join('');
+        }
+        return escapeXml(obj);
+      };
+
+      const rootTag = toPascalCase(rootName);
+      return `<?xml version="1.0" encoding="utf-8"?><${rootTag}>${jsonToXmlRecursive(jsonObj, rootName)}</${rootTag}>`;
+    }
+
+    //#endregion
+  </script>
+
+</body>
+
+</html>

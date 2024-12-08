@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 7</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+  <div class="container mt-5">
+    <h2>Student Notes Feed</h2>
+
+    <div class="form-group">
+      <label for="studentId">Student ID</label>
+      <input type="number" class="form-control" id="studentId" placeholder="Student ID">
+    </div>
+
+    <div class="form-group">
+      <label for="feedForm">Feed Format</label>
+      <select class="form-control" id="feedForm">
+        <option value="json">JSON</option>
+        <option value="atom">Atom</option>
+      </select>
+    </div>
+
+    <button type="button" id="fetchDataButton" class="btn btn-primary">Get Notes</button>
+
+    <div id="result" class="mt-4"></div>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+      $('#fetchDataButton').click(function () {
+        var studentId = $('#studentId').val();
+        var format = $('#feedForm').val();
+
+        if (!studentId || studentId <= 0) {
+          alert("Please enter a valid student ID.");
+          return;
+        }
+
+        var url = `http://localhost:8107/WsRamSyndicationService/StudentNotesFeed/${studentId}?format=${format}`;
+
+        $.ajax({
+          url: url,
+          type: 'GET',
+          dataType: 'text',
+          success: function (response) {
+            if (format === 'json') {
+              displayJsonResponse(response);
+            } else if (format === 'atom') {
+              displayAtomResponse(response);
+            }
+          },
+          error: function (error) {
+            $('#result').html('<div class="alert alert-danger">Error fetching data. Please try again later.</div>');
+          }
+        });
+      });
+
+      function displayJsonResponse(data) {
+        var json = JSON.parse(data);
+        var html = `<h3>${json.title}</h3>
+                    <p><strong>Subtitle:</strong> ${json.subtitle}</p>
+                    <p><strong>Updated:</strong> ${json.updated}</p>
+                    <ul class="list-group">`;
+
+        json.entries.forEach(entry => {
+          html += `<li class="list-group-item">
+                     <h5>${entry.title}</h5>
+                     <p><strong>Updated:</strong> ${entry.updated}</p>
+                     <p><strong>Content:</strong> ${entry.content}</p>
+                   </li>`;
+        });
+
+        html += `</ul>`;
+
+        $('#result').html(html);
+      }
+
+      function displayAtomResponse(data) {
+        var parser = new DOMParser();
+        var xmlDoc = parser.parseFromString(data, "application/xml");
+        var feed = xmlDoc.getElementsByTagName('feed')[0];
+
+        var html = `<h3>${feed.getElementsByTagName('title')[0].textContent}</h3>
+                    <p><strong>Subtitle:</strong> ${feed.getElementsByTagName('subtitle')[0].textContent}</p>
+                    <p><strong>Updated:</strong> ${feed.getElementsByTagName('updated')[0].textContent}</p>
+                    <ul class="list-group">`;
+
+        var entries = feed.getElementsByTagName('entry');
+        for (var i = 0; i < entries.length; i++) {
+          var entry = entries[i];
+          html += `<li class="list-group-item">
+                     <h5>${entry.getElementsByTagName('title')[0].textContent}</h5>
+                     <p><strong>Updated:</strong> ${entry.getElementsByTagName('updated')[0].textContent}</p>
+                     <p><strong>Content:</strong> ${entry.getElementsByTagName('content')[0].textContent}</p>
+                   </li>`;
+        }
+
+        html += `</ul>`;
+
+        $('#result').html(html);
+      }
+    });
+  </script>
+</body>
+
+</html>

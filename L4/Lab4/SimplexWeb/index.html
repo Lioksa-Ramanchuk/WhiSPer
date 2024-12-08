@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simplex Web</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <form id="addForm">
+    <input type="text" id="x" />
+    <label> + </label>
+    <input type="text" id="y" />
+    <button type="submit" id="sum">=</button>
+    <input type="text" readonly tabindex="-1" id="result" />
+  </form>
+
+  <script>
+    $(document).ready(() => {
+      $('#addForm').on('submit', (e) => {
+        e.preventDefault();
+
+        const x = parseInt($('#x').val());
+        const y = parseInt($('#y').val());
+
+        $.ajax({
+          type: "POST",
+          url: "http://localhost:51627/Simplex.asmx/AddS",
+          data: JSON.stringify({ x: x, y: y }),
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: (response) => {
+            $('#result').val(response.d);
+          },
+          error: (xhr, status, error) => {
+            alert("Error: " + xhr.responseJSON.Message);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
