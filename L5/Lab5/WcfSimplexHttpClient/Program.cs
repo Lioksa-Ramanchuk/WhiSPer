@@ -32,7 +32,9 @@ namespace WcfSimplexHttpClient
                 var a3 = httpSimplex.Sum(a1, a2);
 
                 Console.WriteLine(
-                    $"A{{s=\"{a1.s}\", k={a1.k}, f={a1.f.ToString("F2")}}} sum A{{s=\"{a2.s}\", k={a2.k}, f={a2.f.ToString("F2")}}} = A{{s=\"{a3.s}\", k={a3.k}, f={a3.f.ToString("F2")}}}"
+                    $"A{{s=\"{a1.s}\", k={a1.k}, f={a1.f:F2}}} sum " +
+                    $"A{{s=\"{a2.s}\", k={a2.k}, f={a2.f:F2}}} = " +
+                    $"A{{s=\"{a3.s}\", k={a3.k}, f={a3.f:F2}}}"
                 );
 
                 Console.WriteLine();

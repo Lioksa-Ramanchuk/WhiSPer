@@ -107,7 +107,6 @@
     $(document).ready(() => {
       setupEventHandlers();
       loadStudents();
-      updateSaveNoteButtonState();
     });
 
     function setupEventHandlers() {
@@ -195,7 +194,7 @@
 
     function handleStudentFormSubmit(event) {
       event.preventDefault();
-      const studentId = $('#studentId').val();
+      const studentId = +$('#studentId').val();
       const studentData = { name: $('#studentName').val() };
       const isEditing = !!studentId;
 
@@ -241,7 +240,7 @@
     function handleNoteFormSubmit(event) {
       event.preventDefault();
       const noteId = $('#noteId').val();
-      const studentId = $('#studentId').val();
+      const studentId = +$('#studentId').val();
       const noteData = {
         subj: $('#noteSubject').val(),
         note1: parseInt($('#noteValue').val()),
@@ -249,7 +248,7 @@
       };
 
       sendApiRequest(
-        `${API_BASE_URL}/Notes${noteId ? `(${noteId})` : `/Students(${studentId})/Notes`}`,
+        `${API_BASE_URL}/${noteId ? `Notes(${noteId})` : `Students(${studentId})/Notes`}`,
         noteId ? 'PUT' : 'POST',
         noteData,
         () => {
@@ -268,6 +267,7 @@
     }
 
     function loadNotes(studentId) {
+      $('#studentId').val(studentId);
       sendApiRequest(
         `${API_BASE_URL}/Students(${studentId})/Notes`,
         'GET',
