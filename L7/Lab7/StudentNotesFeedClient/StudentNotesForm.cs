@@ -14,17 +14,12 @@ namespace StudentNotesFeedClient
         public StudentNotesForm()
         {
             InitializeComponent();
-            FeedFormatInput.Items.AddRange(new string[] { "json", "atom" });
+            FeedFormatInput.Items.AddRange(new string[] { "atom", "rss", "json" });
             FeedFormatInput.SelectedIndex = 0;
         }
 
         private void FetchButton_Click(object sender, System.EventArgs e)
         {
-            //HttpWebRequest request = WebRequest.Create($@"http://localhost:8107/WsRamSyndicationService/StudentNotesFeed/{StudentIdInput.Value}?format={FeedFormatInput.SelectedText.ToLower()}");
-            //HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            //var content = new StreamReader(response.GetResponseStream()).ReadToEnd();
-            //ContentTextBox.Text = content;
-
             string format = FeedFormatInput.SelectedItem.ToString();
             string url =
                 $"http://localhost:8107/WsRamSyndicationService/StudentNotesFeed/{StudentIdInput.Value}?format={format}";
@@ -48,13 +43,16 @@ namespace StudentNotesFeedClient
 
                 RawContentTextBox.Text = content;
 
-                if (format == "json")
-                {
-                    DisplayJson(content);
-                }
-                else if (format == "atom")
+                if (format == "atom")
                 {
                     DisplayAtom(content);
+                }
+                else if (format == "rss")
+                {
+                    DisplayRss(content);
+                } else if (format == "json")
+                {
+                    DisplayJson(content);
                 }
             }
             catch (Exception ex)
@@ -66,24 +64,6 @@ namespace StudentNotesFeedClient
                     MessageBoxIcon.Error
                 );
             }
-        }
-
-        private void DisplayJson(string jsonResponse)
-        {
-            var json = JObject.Parse(jsonResponse);
-
-            StringBuilder formattedResult = new StringBuilder();
-            formattedResult.AppendLine($"Title: {json["title"]}");
-            formattedResult.AppendLine($"Subtitle: {json["subtitle"]}");
-            formattedResult.AppendLine($"Updated: {json["updated"]}");
-            formattedResult.AppendLine();
-            formattedResult.AppendLine("Entries:");
-            foreach (var entry in json["entries"])
-            {
-                formattedResult.AppendLine($" - {entry["title"]}: {entry["content"]}");
-            }
-
-            ContentTextBox.Text = formattedResult.ToString();
         }
 
         private void DisplayAtom(string atomResponse)
@@ -111,6 +91,52 @@ namespace StudentNotesFeedClient
                 var entryContent = entry.SelectSingleNode("atom:content", nsManager)?.InnerText;
 
                 formattedResult.AppendLine($" - {entryTitle}: {entryContent}");
+            }
+
+            ContentTextBox.Text = formattedResult.ToString();
+        }
+
+        private void DisplayRss(string rssResponse)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(rssResponse);
+
+            StringBuilder formattedResult = new StringBuilder();
+
+            var nsManager = new XmlNamespaceManager(doc.NameTable);
+            nsManager.AddNamespace("rss", "http://purl.org/rss/1.0/");
+
+            var title = doc.SelectSingleNode("//channel/title")?.InnerText;
+            var description = doc.SelectSingleNode("//channel/description")?.InnerText;
+
+            formattedResult.AppendLine($"Title: {title}");
+            formattedResult.AppendLine($"Description: {description}");
+            formattedResult.AppendLine();
+            formattedResult.AppendLine("Entries:");
+            foreach (XmlNode item in doc.SelectNodes("//item"))
+            {
+                var entryTitle = item.SelectSingleNode("title")?.InnerText;
+                var entryDescription = item.SelectSingleNode("description")?.InnerText;
+
+                formattedResult.AppendLine($" - {entryTitle}: {entryDescription}");
+            }
+
+            ContentTextBox.Text = formattedResult.ToString();
+        }
+
+        private void DisplayJson(string jsonResponse)
+        {
+            var json = JObject.Parse(jsonResponse);
+
+            StringBuilder formattedResult = new StringBuilder();
+            formattedResult.AppendLine($"Title: {json["title"]}");
+            formattedResult.AppendLine($"Subtitle: {json["subtitle"]}");
+            formattedResult.AppendLine($"Updated: {json["updated"]}");
+            formattedResult.AppendLine();
+            formattedResult.AppendLine("Entries:");
+            foreach (var entry in json["entries"])
+            {
+                formattedResult.AppendLine($" - {entry["title"]}: {entry["content"]}");
             }
 
             ContentTextBox.Text = formattedResult.ToString();

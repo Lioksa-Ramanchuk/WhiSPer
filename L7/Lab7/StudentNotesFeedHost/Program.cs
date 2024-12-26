@@ -11,11 +11,6 @@ namespace StudentNotesFeedHost
         {
             using (WebServiceHost host = new WebServiceHost(typeof(StudentNotesFeed)))
             {
-                foreach (var endpoint in host.Description.Endpoints)
-                {
-                    endpoint.Behaviors.Add(new CorsBehavior());
-                }
-
                 host.Open();
                 Console.WriteLine($"WsRamSyndication host is running");
 

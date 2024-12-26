@@ -29,10 +29,11 @@ namespace WsRamSyndicationService
                 .Current
                 ?.IncomingRequest
                 ?.UriTemplateMatch
-                ?.QueryParameters["format"];
-            bool usingAtom = format?.ToLower() == "atom";
+                ?.QueryParameters["format"].ToLower();
 
-            return usingAtom ? GetAtomFeed(studentIdParsed) : GetJsonResponse(studentIdParsed);
+            return format == "atom" ? GetAtomFeed(studentIdParsed)
+                : format == "rss" ? GetRssFeed(studentIdParsed)
+                : GetJsonResponse(studentIdParsed);
         }
 
         private Stream GetAtomFeed(int studentId)
@@ -68,6 +69,42 @@ namespace WsRamSyndicationService
             memoryStream.Position = 0;
 
             WebOperationContext.Current.OutgoingResponse.ContentType = "application/atom+xml";
+            return memoryStream;
+        }
+
+        private Stream GetRssFeed(int studentId)
+        {
+            var memoryStream = new MemoryStream();
+            var feedData = GetFeedData(studentId);
+            if (feedData == null)
+            {
+                return memoryStream;
+            }
+
+            var feed = new SyndicationFeed(feedData.Title, feedData.Subtitle, null)
+            {
+                Items = feedData
+                    .Entries.Select(entry => new SyndicationItem(
+                        title: entry.Title,
+                        content: entry.Content,
+                        itemAlternateLink: null
+                    ))
+                    .ToList(),
+            };
+
+            using (
+                var writer = XmlWriter.Create(
+                    memoryStream,
+                    new XmlWriterSettings { CloseOutput = false }
+                )
+            )
+            {
+                new Rss20FeedFormatter(feed).WriteTo(writer);
+                writer.Flush();
+            }
+            memoryStream.Position = 0;
+
+            WebOperationContext.Current.OutgoingResponse.ContentType = "application/rss+xml";
             return memoryStream;
         }
 
