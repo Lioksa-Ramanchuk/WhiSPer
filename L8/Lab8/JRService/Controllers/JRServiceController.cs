@@ -98,14 +98,19 @@ namespace JRService.Controllers
 
         private JsonRpcResponse ProcessRequest(JsonRpcRequest request)
         {
-            if (request.Jsonrpc != "2.0" || request.Id == null)
+            if (request.Id == null)
             {
-                return CreateErrorResponse(ErrorCode.InvalidRequest);
+                return CreateErrorResponse(ErrorCode.InvalidRequest, null);
+            }
+
+            if (request.Jsonrpc != "2.0")
+            {
+                return CreateErrorResponse(ErrorCode.InvalidRequest, request.Id);
             }
 
             if (!_methods.TryGetValue(request.Method, out var handler))
             {
-                return CreateErrorResponse(ErrorCode.MethodNotFound);
+                return CreateErrorResponse(ErrorCode.MethodNotFound, request.Id);
             }
 
             try
@@ -114,7 +119,7 @@ namespace JRService.Controllers
                 {
                     return request.Params is null
                         ? CreateSuccessfulResponse(handler.Invoke(), request.Id)
-                        : CreateErrorResponse(ErrorCode.InvalidParams);
+                        : CreateErrorResponse(ErrorCode.InvalidParams, request.Id);
                 }
 
                 JsonRpcParams jrpcParams;
@@ -125,11 +130,11 @@ namespace JRService.Controllers
                 }
                 catch (Exception)
                 {
-                    return CreateErrorResponse(ErrorCode.InvalidParams);
+                    return CreateErrorResponse(ErrorCode.InvalidParams, request.Id);
                 }
 
                 return jrpcParams is null
-                    ? CreateErrorResponse(ErrorCode.InvalidParams)
+                    ? CreateErrorResponse(ErrorCode.InvalidParams, request.Id)
                     : CreateSuccessfulResponse(handler.Invoke(jrpcParams), request.Id);
             }
             catch (Exception ex) when (ex.InnerException is JRServiceException jrsException)
@@ -137,7 +142,7 @@ namespace JRService.Controllers
                 return new JsonRpcResponse
                 {
                     Error = new JsonRpcError(jrsException.Code),
-                    Id = null,
+                    Id = request.Id,
                 };
             }
             catch (Exception ex)
@@ -147,7 +152,7 @@ namespace JRService.Controllers
                 return new JsonRpcResponse
                 {
                     Error = new JsonRpcError(ErrorCode.InternalError),
-                    Id = null,
+                    Id = request.Id,
                 };
             }
         }
@@ -157,9 +162,9 @@ namespace JRService.Controllers
             return new JsonRpcResponse { Result = result, Id = id };
         }
 
-        private JsonRpcResponse CreateErrorResponse(ErrorCode code)
+        private JsonRpcResponse CreateErrorResponse(ErrorCode code, object id)
         {
-            return new JsonRpcResponse { Error = new JsonRpcError(code), Id = null };
+            return new JsonRpcResponse { Error = new JsonRpcError(code), Id = id };
         }
 
         private int SetM(string k, int x)
