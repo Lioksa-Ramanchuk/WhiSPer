@@ -65,13 +65,31 @@ namespace JRService.Controllers
             {
                 if (requestToken.Type == JTokenType.Object)
                 {
-                    var singleRequest = requestToken.ToObject<JsonRpcRequest>();
+                    JsonRpcRequest singleRequest = null;
+                    try
+                    {
+                        singleRequest = requestToken.ToObject<JsonRpcRequest>();
+                    }
+                    catch
+                    {
+                        return CreateErrorResponse(ErrorCode.InvalidRequest, null);
+                    }
+
                     return ProcessRequest(singleRequest);
                 }
 
                 if (requestToken.Type == JTokenType.Array)
                 {
-                    var batchRequests = requestToken.ToObject<JsonRpcRequest[]>();
+                    JsonRpcRequest[] batchRequests = Array.Empty<JsonRpcRequest>();
+                    try
+                    {
+                        batchRequests = requestToken.ToObject<JsonRpcRequest[]>();
+                    }
+                    catch
+                    {
+                        return CreateErrorResponse(ErrorCode.InvalidRequest, null);
+                    }
+
                     var response = batchRequests
                         .TakeWhile(_ => !ErrorExitFlag)
                         .Select(ProcessRequest)
@@ -80,19 +98,11 @@ namespace JRService.Controllers
                     return response;
                 }
 
-                return new JsonRpcResponse
-                {
-                    Error = new JsonRpcError(ErrorCode.InvalidRequest),
-                    Id = null,
-                };
+                return CreateErrorResponse(ErrorCode.InvalidRequest, null);
             }
             catch (Exception)
             {
-                return new JsonRpcResponse
-                {
-                    Error = new JsonRpcError(ErrorCode.InternalError),
-                    Id = null,
-                };
+                return CreateErrorResponse(ErrorCode.InternalError, null);
             }
         }
 
@@ -139,21 +149,12 @@ namespace JRService.Controllers
             }
             catch (Exception ex) when (ex.InnerException is JRServiceException jrsException)
             {
-                return new JsonRpcResponse
-                {
-                    Error = new JsonRpcError(jrsException.Code),
-                    Id = request.Id,
-                };
+                return CreateErrorResponse(jrsException.Code, request.Id);
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
-
-                return new JsonRpcResponse
-                {
-                    Error = new JsonRpcError(ErrorCode.InternalError),
-                    Id = request.Id,
-                };
+                return CreateErrorResponse(ErrorCode.InternalError, request.Id);
             }
         }
 
